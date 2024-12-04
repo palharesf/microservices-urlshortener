@@ -25,6 +25,12 @@ app.listen(port, function() {
 
 // All of the code above is boilerplate; actual implementation starts below
 
+// Add parsing functionalities to express in order to work with unencoded URLs (the default mode received by the POST request)
+// JSON parsing
+app.use(express.json());
+// URL parsing
+app.use(express.urlencoded({ extended: true }));
+
 // Creating route handler for the api/shorturl endpoint
 app.post('/api/shorturl', (req, res) => {
   // Getting the url from the request
@@ -34,6 +40,6 @@ app.post('/api/shorturl', (req, res) => {
   
   // Sending both the original and short url as a JSON response object
   res.json({
-    original_url: 'test',
+    original_url: url,
     short_url: 'short_test' });
 });
