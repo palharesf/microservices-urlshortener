@@ -22,3 +22,18 @@ app.get('/api/hello', function(req, res) {
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
+
+// All of the code above is boilerplate; actual implementation starts below
+
+// Creating route handler for the api/shorturl endpoint
+app.post('/api/shorturl', (req, res) => {
+  // Getting the url from the request
+  const url = req.body.url;
+
+  // Creating the short url from the long url
+  
+  // Sending both the original and short url as a JSON response object
+  res.json({
+    original_url: 'test',
+    short_url: 'short_test' });
+});
