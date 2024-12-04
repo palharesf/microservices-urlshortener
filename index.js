@@ -27,7 +27,9 @@ app.listen(port, function() {
 
 // All of the code above is boilerplate; actual implementation starts below
 
-const shortUrlIndex = 0;
+let longUrl = "";
+let shortUrl = 0;
+let shortUrlIndex = 0;
 function shortUrlInc(shortUrlIndex) {
   return ++shortUrlIndex;
 };
@@ -40,21 +42,24 @@ const urlMap = new Map(); // Creating a map to store all originalurl-shorturl ke
 
 // Creating route handler for the api/shorturl endpoint
 app.post('/api/shorturl', (req, res) => {
-  const longUrl = req.body.url; // Getting the url from the request
+  longUrl = req.body.url; // Getting the url from the request
 
   try {
-    const host = new URL(url).hostname; // This expression will send a TypeError if the 'url' passed is not in the proper url format, in which case the error will be 'caught' outside the 'try' block
-    dns.lookup(host, { family: 6 }, (err, address) => {
+    const host = new URL(longUrl).hostname; // This expression will send a TypeError if the 'url' passed is not in the proper url format, in which case the error will be 'caught' outside the 'try' block
+    dns.lookup(host, (err, address) => {
       if (err) {
         // The domain does not exist or is not resolvable
-        res.status(400).json({ error: 'Invalid URL' });
+        res.status(400).json({ error: 'Invalid URL - Err' });
       } else {
         // The domain exists and is resolvable, proceed to URL shortening logic
 
-        // These two function calls ensure that the short url is unique and the Index is always updated after creating a new short url
-        const shortUrl = shortUrlInc(shortUrlIndex);
-        shortUrlIndex = shortUrlInc(shortUrlIndex);
-        urlMap.set(shortUrl, originalUrl);
+        // Check if longUrl already exists in the map; if not, create a shortUrl and add both to the map
+        if (!urlMap.has(longUrl)) {
+          // These two function calls ensure that the short url is unique and the Index is always updated after creating a new short url
+          shortUrl = shortUrlInc(shortUrlIndex);
+          shortUrlIndex = shortUrlInc(shortUrlIndex);
+          urlMap.set(shortUrl, longUrl);       
+        }
 
         // Sending both the original and short url as a JSON response object
         res.json({
@@ -68,10 +73,10 @@ app.post('/api/shorturl', (req, res) => {
 });
 
 app.get('/api/shorturl/:short_url', function(req, res) {
-  const shortUrl = req.params.short_url;
-  const longUrl = urlMap.get(shortUrl);
+  const shortUrlParam = req.params.short_url;
+  const longUrl = urlMap.get(parseInt(shortUrlParam));
   if (longUrl) {
-    res.redirect(originalUrl);
+    res.redirect(longUrl);
   } else {
     res.status(404).json({ error: 'Short URL not found' });
   }
