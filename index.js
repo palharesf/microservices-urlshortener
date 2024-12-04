@@ -46,10 +46,10 @@ app.post('/api/shorturl', (req, res) => {
 
   try {
     const host = new URL(longUrl).hostname; // This expression will send a TypeError if the 'url' passed is not in the proper url format, in which case the error will be 'caught' outside the 'try' block
-    dns.lookup(host, (err, address) => {
+    dns.lookup(host, { timeout: 500 }, (err, address) => {
       if (err) {
         // The domain does not exist or is not resolvable
-        res.status(400).json({ error: 'Invalid URL - Err' });
+        res.json({ error: 'Invalid URL' });
       } else {
         // The domain exists and is resolvable, proceed to URL shortening logic
 
@@ -62,13 +62,13 @@ app.post('/api/shorturl', (req, res) => {
         }
 
         // Sending both the original and short url as a JSON response object
-        res.json({
+        return res.json({
           original_url: longUrl,
           short_url: shortUrl });
       }
     })  
   } catch (error) {
-    res.status(400).json({ error: 'Invalid URL' }); // In case there is a TypeError when trying to form a URL from a malformed string     
+    return res.json({ error: 'Invalid URL' }); // In case there is a TypeError when trying to form a URL from a malformed string     
   }  
 });
 
@@ -76,9 +76,9 @@ app.get('/api/shorturl/:short_url', function(req, res) {
   const shortUrlParam = req.params.short_url;
   const longUrl = urlMap.get(parseInt(shortUrlParam));
   if (longUrl) {
-    res.redirect(longUrl);
+    return res.redirect(longUrl);
   } else {
-    res.status(404).json({ error: 'Short URL not found' });
+    return res.json({ error: 'Short URL not found' });
   }
 });
 
